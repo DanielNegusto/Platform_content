@@ -118,5 +118,8 @@ class Subscription(models.Model):
     subscribed_to = models.ForeignKey(User, on_delete=models.CASCADE, related_name='subscribers')  # На кого подписались
     created_at = models.DateTimeField(auto_now_add=True)
 
+    class Meta:
+        unique_together = ('user', 'subscribed_to')
+
     def __str__(self):
         return f"{self.user.email} подписан на {self.subscribed_to.email}"

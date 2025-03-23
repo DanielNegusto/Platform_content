@@ -77,6 +77,7 @@ class ProfileView(LoginRequiredMixin, DetailView):
 
         # Проверка подписки
         is_subscribed = Subscription.objects.filter(user=self.request.user, subscribed_to=user).exists()
+        print(f":User  {self.request.user}, Subscribed to: {user}, Is Subscribed: {is_subscribed}")
         # Подсчет подписчиков
         subscribers_count = user.subscribers.count()  # Используем правильное имя атрибута
 
@@ -139,7 +140,14 @@ class ConfirmationView(View):
 
 class CreateCheckoutSessionView(View):
     def post(self, request, user_id):
-        user = User.objects.get(id=user_id)
+        # Получаем пользователя, который подписывается (текущий пользователь)
+        current_user = request.user  # Текущий аутентифицированный пользователь
+        # Получаем пользователя, на которого подписываются
+        user_to_subscribe = User.objects.get(id=user_id)
+
+        # Убедитесь, что пользователь не пытается подписаться на самого себя
+        if current_user.id == user_to_subscribe.id:
+            return JsonResponse({'error': 'Вы не можете подписаться на себя.'}, status=400)
 
         # Создайте сессию платежа для подписки
         session = stripe.checkout.Session.create(
@@ -149,7 +157,7 @@ class CreateCheckoutSessionView(View):
                     'price_data': {
                         'currency': 'rub',  # Указываем рубли
                         'product_data': {
-                            'name': f'Подписка для {user.email}',  # Название продукта
+                            'name': f'Подписка для {user_to_subscribe.email}',  # Название продукта
                         },
                         'unit_amount': 60000,  # Указываем цену в копейках (600 рублей = 60000 копеек)
                     },
@@ -157,7 +165,7 @@ class CreateCheckoutSessionView(View):
                 },
             ],
             mode='payment',
-            success_url=request.build_absolute_uri('/users/success/'),  # Укажите URL для успешной оплаты
+            success_url=request.build_absolute_uri(f'/users/success/?subscribed_to_id={user_to_subscribe.id}&user_id={current_user.id}'),  # Укажите URL для успешной оплаты
             cancel_url=request.build_absolute_uri('/users/cancel/'),  # Укажите URL для отмены
         )
 
