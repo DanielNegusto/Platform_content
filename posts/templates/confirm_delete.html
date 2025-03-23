@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block title %}Подтверждение удаления{% endblock %}
+
+{% block content %}
+
+    <div class="container mt-5">
+        <h2 class="text-danger">Подтверждение удаления поста</h2>
+        <p>Вы уверены, что хотите удалить пост "<strong>{{ post.title }}</strong>"?</p>
+        <form method="post" class="mt-4">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger">Удалить</button>
+            <a href="{% url 'user_posts' %}" class="btn btn-secondary">Отмена</a>
+        </form>
+    </div>
+
+    <!-- Подключение Bootstrap JS и jQuery (если нужно) -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+{% endblock %}

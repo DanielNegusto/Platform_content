@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block title %}Мои посты{% endblock %}
+
+{% block content %}
+    <div class="container mt-4">
+        <h2>Мои посты</h2>
+        <div class="list-group">
+            {% for post in posts %}
+                <div class="list-group-item">
+                    <h5 class="mb-1">{{ post.title }}</h5>
+                    <p class="mb-1">{{ post.content|truncatewords:30 }}</p>
+                    <p class="mb-1"><strong>Дата создания:</strong> {{ post.created_at|date:"d M Y" }}</p>
+                    <a href="{% url 'post_edit' post.id %}" class="btn btn-warning btn-sm">Редактировать</a>
+                    <a href="{% url 'post_delete' post.id %}" class="btn btn-danger btn-sm">Удалить</a>  <!-- Ссылка на удаление -->
+                </div>
+            {% empty %}
+                <div class="list-group-item">У вас еще нет постов.</div>
+            {% endfor %}
+        </div>
+        <a href="{% url 'post_create' %}" class="btn btn-primary mt-3">Создать новый пост</a>
+    </div>
+{% endblock %}

@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Профиль пользователя {{ user.email }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="text-center mb-4">Профиль пользователя {{ user.email }}</h2>
+    <div class="card mb-4">
+        <div class="card-body d-flex">
+            <div class="me-3">
+                {% if user.avatar %}
+                    <img src="{{ user.avatar.url }}" alt="Аватар" class="img-thumbnail" style="width: 150px; height: 150px;">
+                {% else %}
+                    <img src="{% static 'default_avatar.png' %}" alt="Аватар" class="img-thumbnail" style="width: 150px; height: 150px;">
+                {% endif %}
+            </div>
+            <div>
+                <p><strong>Email:</strong> {{ user.email }}</p>
+                <p><strong>Имя:</strong> {{ user.first_name|default:"Не указано" }}</p>
+                <p><strong>Фамилия:</strong> {{ user.last_name|default:"Не указана" }}</p>
+                <p><strong>Номер телефона:</strong> {{ user.phone_number|default:"Не указан" }}</p>
+                <p><strong>Дата регистрации:</strong> {{ user.created_at|date:"d M Y" }}</p>
+                <p><strong>Описание:</strong> {{ user.description|default:"Нет описания" }}</p>
+                <p><strong>Подписчики:</strong> {{ subscribers_count }}</p>
+
+                {% if request.user == user %}
+                    <a href="{% url 'edit_profile' %}" class="btn btn-secondary mt-3">Изменить профиль</a>
+                {% else %}
+                    {% if is_subscribed %}
+                        <p>Вы подписаны на этого пользователя.</p>
+                    {% else %}
+                        <p><strong>Цена подписки:</strong> 600 ₽</p>
+                        <button class="subscribe-button btn btn-success" data-user-id="{{ user.id }}">Подписаться</button>
+                    {% endif %}
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <h3 class="mt-4">Статистика</h3>
+    <p><strong>Количество созданных постов:</strong> {{ posts.count }}</p>
+
+    <h3 class="mt-4">Созданные посты:</h3>
+    <div class="row">
+        {% for post in posts %}
+            <div class="col-md-4 mb-4">
+                <div class="card">
+                    {% if post.image %}
+                        <img src="{{ post.image.url }}" class="card-img-top" alt="{{ post.title }}">
+                    {% endif %}
+                    <div class="card-body">
+                        <h5 class="card-title">{{ post.title }}</h5>
+                        <p class="card-text">{{ post.content|truncatewords:20 }}</p>
+                        <a href="{% url 'post_detail' post.id %}" class="btn btn-primary">Читать далее</a>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="col-12">
+                <p>Посты отсутствуют.</p>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+
+<script src="https://js.stripe.com/v3/"></script>
+<script>
+    var stripe = Stripe('{{ stripe_public_key }}');
+
+    document.querySelectorAll('.subscribe-button').forEach(button => {
+        button.addEventListener('click', function() {
+            var userId = this.dataset.userId;  // Получаем ID пользователя из атрибута data-user-id
+
+            fetch(`/users/create-subscription-session/${userId}/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}',
+                },
+            })
+            .then(function(response) {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok: ' + response.statusText);
+                }
+                return response.json();
+            })
+            .then(function(data) {
+                return stripe.redirectToCheckout({ sessionId: data.id });
+            })
+            .then(function(result) {
+                if (result.error) {
+                    alert(result.error.message);
+                }
+            })
+            .catch(function(error) {
+                console.error('Error:', error);
+                alert('Произошла ошибка: ' + error.message);
+            });
+        });
+    });
+</script>
+{% endblock %}

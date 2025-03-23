@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+
+{% block title %}Главная страница{% endblock %}
+
+{% block content %}
+    <button id="filter-button" class="btn btn-primary mb-3">Фильтр</button>
+    <div id="filter-menu" style="display: none;">
+        <form method="GET" class="mb-4">
+            <div class="form-group">
+                <label>Выберите категории:</label><br>
+                {% for category in categories %}
+                    <div class="form-check">
+                        <input type="checkbox" name="categories" value="{{ category.slug }}" id="category-{{ category.slug }}" class="form-check-input"
+                        {% if category.slug in request.GET.categories %}checked{% endif %}>
+                        <label for="category-{{ category.slug }}" class="form-check-label">{{ category.name }}</label>
+                    </div>
+                {% endfor %}
+            </div>
+            <div class="form-group">
+                <label>Статус:</label>
+                <select name="status" class="form-control">
+                    <option value="">Все</option>
+                    <option value="free" {% if request.GET.status == 'free' %}selected{% endif %}>Бесплатные</option>
+                    <option value="paid" {% if request.GET.status == 'paid' %}selected{% endif %}>Платные</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary mt-3">Применить фильтры</button>
+        </form>
+    </div>
+
+    <h3>Список постов:</h3>
+    <div class="row">
+        {% for post in posts %}
+            <div class="col-md-3 mb-4">
+                <div class="card">
+                    {% if post.image %}
+                        <img src="{{ post.image.url }}" class="card-img-top" alt="{{ post.title }}">
+                    {% endif %}
+                    <div class="card-body">
+                        <h5 class="card-title">{{ post.title }}</h5>
+                        <p><strong>Категории:</strong>
+                            {% for category in post.categories.all %}
+                                {{ category.name }}{% if not forloop.last %}, {% endif %}
+                            {% endfor %}
+                        </p>
+                        <p><strong>Автор:</strong> <a href="{% url 'profile_detail' post.author.email %}">{{ post.author.email }}</a></p>
+                        <p><strong>Статус:</strong> {{ post.get_status_display }}</p>
+                        <a href="{% url 'post_detail' post.id %}" class="btn btn-primary">Читать далее</a>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="col-12">
+                <p>Посты отсутствуют.</p>
+            </div>
+        {% endfor %}
+    </div>
+
+    <script>
+        document.getElementById('filter-button').addEventListener('click', function() {
+            var menu = document.getElementById('filter-menu');
+            menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+        });
+    </script>
+{% endblock %}
+

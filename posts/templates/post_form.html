@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Создать пост{% endblock %}
+
+{% block content %}
+    <div class="container mt-4">
+        <h2>{% if form.instance.pk %}Редактировать пост{% else %}Создать пост{% endif %}</h2>
+        <form method="post" enctype="multipart/form-data" class="form-group">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label for="id_title" class="form-label">Заголовок</label>
+                {{ form.title }}  <!-- Поле заголовка -->
+            </div>
+            <div class="mb-3">
+                <label for="id_content" class="form-label">Содержимое</label>
+                {{ form.content }}  <!-- Поле содержимого -->
+            </div>
+            <div class="mb-3">
+                <label for="id_status" class="form-label">Статус</label>
+                {{ form.status }}  <!-- Поле статуса -->
+            </div>
+            <div class="mb-3">
+                <label for="categories" class="form-label">Категории</label>
+                {{ form.categories }}  <!-- Поле для категорий -->
+            </div>
+            <div class="mb-3">
+                <label for="new_category" class="form-label">Создать новую категорию</label>
+                {{ form.new_category }}  <!-- Поле для новой категории -->
+            </div>
+            <div class="mb-3">
+                <label for="id_image" class="form-label">Изображение</label>
+                {{ form.image }}  <!-- Поле для изображения -->
+            </div>
+            <div class="mb-3">
+                <label for="id_video" class="form-label">Видео</label>
+                {{ form.video }}  <!-- Поле для видео -->
+            </div>
+            <button type="submit" class="btn btn-primary">Сохранить</button>
+        </form>
+    </div>
+{% endblock %}

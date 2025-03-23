@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ post.title }}{% endblock %}
+
+{% block content %}
+    <div class="container mt-4">
+        <div class="post-detail card">
+            <div class="card-body">
+                <h1 class="card-title">{{ post.title }}</h1>
+                <p class="card-text">
+                    <small class="text-muted">Опубликовано {{ post.created_at|date:"d F Y" }} в {{ post.created_at|date:"H:i" }}</small>
+                </p>
+                {% if post.image %}
+                    <img src="{{ post.image.url }}" alt="{{ post.title }}" class="img-fluid mb-3" />
+                {% endif %}
+
+                {% if has_access %}
+                    <p>{{ post.content }}</p>
+                {% else %}
+                    <p>Вы не можете просмотреть этот пост, так как он платный. Чтобы прочитать данный контент, вам нужно подписаться на автора.</p>
+                    <p><strong>Автор:</strong> <a href="{% url 'profile_detail' post.author.email %}">{{ post.author.email }}</a></p>  <!-- Ссылка на профиль автора -->
+                {% endif %}
+
+                <div class="mt-4">
+                    <h5>Поделиться:</h5>
+                    <a href="https://telegram.me/share/url?url={{ request.build_absolute_uri }}&text={{ post.title }}" target="_blank" class="btn btn-primary">Telegram</a>
+                    <a href="https://www.instagram.com/?url={{ request.build_absolute_uri }}" target="_blank" class="btn btn-info">Instagram</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.querySelectorAll('.checkout-button').forEach(button => {
+            button.addEventListener('click', function() {
+                alert('Пожалуйста, свяжитесь с автором для получения доступа к этому посту.'); // Сообщение для пользователя
+            });
+        });
+    </script>
+{% endblock %}
