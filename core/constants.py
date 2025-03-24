@@ -23,7 +23,7 @@ DESCRIPTION_LENGTH = 2000
 
 IMAGE_EXTENSIONS = ('jpg', 'jpeg', 'png')
 
-MAX_AVATAR_SIZE = 5 * 1024 * 1024
+MAX_AVATAR_SIZE = 20 * 1024 * 1024
 
 CODE_SEND_FREQUENCY = timedelta(days=0, hours=0, minutes=0, seconds=50)
 
