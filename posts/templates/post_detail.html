@@ -10,11 +10,11 @@
                 <p class="card-text">
                     <small class="text-muted">Опубликовано {{ post.created_at|date:"d F Y" }} в {{ post.created_at|date:"H:i" }}</small>
                 </p>
-                {% if post.image %}
-                    <img src="{{ post.image.url }}" alt="{{ post.title }}" class="img-fluid mb-3" />
-                {% endif %}
 
                 {% if has_access %}
+                    {% if post.image %}
+                        <img src="{{ post.image.url }}" alt="{{ post.title }}" class="img-fluid mb-3" />
+                    {% endif %}
                     <p>{{ post.content }}</p>
                 {% else %}
                     <p>Вы не можете просмотреть этот пост, так как он платный. Чтобы прочитать данный контент, вам нужно подписаться на автора.</p>
