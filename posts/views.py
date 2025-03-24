@@ -73,7 +73,7 @@ class PostCreateView(View):
         return render(request, self.template_name, {'form': form})
 
 
-class PostDetailView(LoginRequiredMixin, DetailView):
+class PostDetailView(DetailView):
     model = Post
     template_name = 'post_detail.html'
     context_object_name = 'post'
