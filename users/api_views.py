@@ -1,16 +1,13 @@
-import stripe
 from django.conf import settings
-from django.contrib.auth import authenticate
 from django.http import JsonResponse
 from rest_framework import generics, permissions, status, serializers
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.views import APIView
-from rest_framework_simplejwt.tokens import RefreshToken, Token
 
-from . import serializers as users_serializers, services
+from . import serializers as users_serializers
 from users import models as users_models
-from .models import User
+from .models import Subscription
+from .services import create_checkout_session
 
 
 class ProfileRetrieveAPIView(generics.RetrieveAPIView):
@@ -38,7 +35,7 @@ class UserUpdateAPIView(generics.UpdateAPIView):
 class UserDestroyAPIView(generics.DestroyAPIView):
     queryset = users_models.User.objects.all()
     permission_classes = [permissions.IsAuthenticated]
-    lookup_field = 'id'
+    lookup_field = "id"
     serializer_class = users_serializers.GetProfileSerializer
 
     def get_queryset(self):
@@ -73,12 +70,16 @@ class SignUpAPIView(generics.CreateAPIView):
         response_data = {"detail": "Проверочный код отправлен на почту."}
 
         if settings.DEBUG:
-            response_data.update({
-                "debug_phone_number": user.phone_number,
-                "debug_code": user.checking_code
-            })
+            response_data.update(
+                {
+                    "debug_phone_number": user.phone_number,
+                    "debug_code": user.checking_code,
+                }
+            )
 
-        response_serializer = users_serializers.CodeResponseSerializer(data=response_data)
+        response_serializer = users_serializers.CodeResponseSerializer(
+            data=response_data
+        )
         response_serializer.is_valid(raise_exception=True)
 
         return Response(response_serializer.data, status=status.HTTP_201_CREATED)
@@ -90,9 +91,7 @@ class AuthView(generics.GenericAPIView):
 
     def post(self, request):
         serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)  # Проверка валидности данных
-
-        # Вызов метода create из сериализатора для обработки логики аутентификации
+        serializer.is_valid(raise_exception=True)
         try:
             response_data = serializer.create(serializer.validated_data)
             return Response(response_data, status=status.HTTP_200_OK)
@@ -105,32 +104,21 @@ class CreateAPICheckoutSessionView(generics.GenericAPIView):
 
     def get(self, request, email):
         if not email:
-            return JsonResponse({'error': 'Email is required'}, status=400)
+            return JsonResponse({"error": "Email is required"}, status=400)
 
-        try:
-            user = request.user  # Используем аутентифицированного пользователя
-
-            # Создайте сессию платежа для подписки
-            session = stripe.checkout.Session.create(
-                payment_method_types=['card'],
-                line_items=[
-                    {
-                        'price_data': {
-                            'currency': 'rub',
-                            'product_data': {
-                                'name': f'Подписка для {user.email}',
-                            },
-                            'unit_amount': 60000,  # 600 рублей = 60000 копеек
-                        },
-                        'quantity': 1,
-                    },
-                ],
-                mode='payment',
-                success_url=request.build_absolute_uri(f'/users/success/?subscribed_to_id={user.id}&user_id={user.id}'),
-                cancel_url=request.build_absolute_uri('/users/cancel/'),
+        # Проверяем, существует ли подписка
+        if Subscription.objects.filter(
+            user_id=request.user.id, subscribed_to__email=email
+        ).exists():
+            return JsonResponse(
+                {"error": "Вы уже подписаны на этого пользователя."}, status=400
             )
 
-            return JsonResponse({'url': session.url})
+        session = create_checkout_session(
+            request.user, email, request
+        )  # Передаем request
 
-        except Exception as e:
-            return JsonResponse({'error': str(e)}, status=500)
+        if session is None:
+            return JsonResponse({"error": "Пользователь не найден"}, status=404)
+
+        return JsonResponse({"url": session.url})

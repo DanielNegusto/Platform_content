@@ -49,13 +49,13 @@ class UserUpdateSerializer(serializers.ModelSerializer):
         )
 
     def update(self, instance, validated_data):
-        new_phone_number = validated_data.get("phone_number", instance.phone_number)
+        new_email = validated_data.get("email", instance.email)
 
-        if instance.phone_number != new_phone_number:
+        if instance.email != new_email:
             checking_code = users_services.generate_code()
             validated_data["checking_code"] = checking_code
             validated_data["is_active"] = False
-            mailing_tasks.send_code_sms.delay(new_phone_number, checking_code)
+            mailing_tasks.send_code_email.delay(new_email, checking_code)
 
         return super().update(instance, validated_data)
 
@@ -68,10 +68,14 @@ class PhoneNumberOnlyTokenObtainSerializer(serializers.Serializer):
         user = users_services.get_user_by_phone(phone_number)
 
         if not user:
-            raise serializers.ValidationError({"phone_number": "Пользователь не найден."})
+            raise serializers.ValidationError(
+                {"phone_number": "Пользователь не найден."}
+            )
 
         if not user.is_active:
-            raise serializers.ValidationError({"phone_number": "Пользователь не подтверждён."})
+            raise serializers.ValidationError(
+                {"phone_number": "Пользователь не подтверждён."}
+            )
 
         refresh = RefreshToken.for_user(user)
         return {
@@ -108,7 +112,7 @@ class SignInSerializer(serializers.Serializer):
         if not user:
             raise serializers.ValidationError({"detail": "Пользователь не найден."})
 
-        last_code_time = getattr(user, 'last_code_sent', None)
+        last_code_time = getattr(user, "last_code_sent", None)
 
         if last_code_time:
             diff = constants.CODE_SEND_FREQUENCY - (timezone.now() - last_code_time)
@@ -119,7 +123,9 @@ class SignInSerializer(serializers.Serializer):
                 message = "Слишком часто отправляем проверочный код. Попробуйте через"
 
                 if minutes > 0:
-                    message += f" {minutes} мин." + (f" {seconds} сек." if seconds > 0 else "")
+                    message += f" {minutes} мин." + (
+                        f" {seconds} сек." if seconds > 0 else ""
+                    )
                 else:
                     message += f" {seconds} сек."
 
@@ -135,10 +141,9 @@ class SignInSerializer(serializers.Serializer):
         response = {"detail": "Проверочный код отправлен на указанный номер телефона."}
 
         if settings.DEBUG:
-            response.update({
-                "debug_phone_number": phone_number,
-                "debug_code": checking_code
-            })
+            response.update(
+                {"debug_phone_number": phone_number, "debug_code": checking_code}
+            )
 
         return response
 
@@ -156,13 +161,22 @@ class SignUpSerializer(serializers.Serializer):
 
         if not consent:
             raise serializers.ValidationError(
-                {"consent_personal_data": "Необходимо согласие на обработку персональных данных."})
+                {
+                    "consent_personal_data": "Необходимо согласие на обработку персональных данных."
+                }
+            )
 
         if users_models.User.objects.filter(phone_number=phone_number).exists():
-            raise serializers.ValidationError({"phone_number": "Пользователь с таким номером телефона уже существует."})
+            raise serializers.ValidationError(
+                {
+                    "phone_number": "Пользователь с таким номером телефона уже существует."
+                }
+            )
 
         if users_models.User.objects.filter(email=email).exists():
-            raise serializers.ValidationError({"email": "Пользователь с такой электронной почтой уже существует."})
+            raise serializers.ValidationError(
+                {"email": "Пользователь с такой электронной почтой уже существует."}
+            )
 
         return attrs
 
@@ -176,13 +190,12 @@ class SignUpSerializer(serializers.Serializer):
         user = users_models.User.objects.create(
             phone_number=validated_data["phone_number"],
             email=validated_data["email"],
-            password=hashed_password,  # Сохраняем хэшированный пароль
+            password=hashed_password,
             consent_personal_data=validated_data["consent_personal_data"],
             checking_code=checking_code,
-            last_code_sent=timezone.now()
+            last_code_sent=timezone.now(),
         )
 
-        # Отправка кода на электронную почту
         mailing_tasks.send_code_email.delay(user.email, checking_code)
 
         return user
@@ -198,18 +211,21 @@ class AuthCodeSerializer(serializers.Serializer):
 
         user = users_services.get_user_by_phone(phone_number)
         if not user:
-            raise serializers.ValidationError({"phone_number": "Пользователь не найден."})
+            raise serializers.ValidationError(
+                {"phone_number": "Пользователь не найден."}
+            )
 
         if user.checking_code != checking_code:
-            raise serializers.ValidationError({"checking_code": "Неверный проверочный код."})
+            raise serializers.ValidationError(
+                {"checking_code": "Неверный проверочный код."}
+            )
 
-        return attrs  # Возвращаем атрибуты для дальнейшей обработки
+        return attrs
 
     def create(self, validated_data):
         phone_number = validated_data["phone_number"]
         user = users_services.get_user_by_phone(phone_number)
 
-        # Обновляем состояние пользователя
         user.is_active = True
         user.checking_code = None
         user.save(update_fields=["is_active", "checking_code"])
@@ -225,5 +241,5 @@ class AuthCodeSerializer(serializers.Serializer):
         return {
             "refresh": str(refresh),
             "access": str(refresh.access_token),
-            "user": user_info
+            "user": user_info,
         }

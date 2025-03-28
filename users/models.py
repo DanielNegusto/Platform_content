@@ -31,52 +31,42 @@ class UserManager(BaseUserManager):
 class User(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(unique=True, verbose_name="email", **NULLABLE)
 
-    first_name = models.CharField(
-        max_length=constants.CHAR_LENGTH,
-        verbose_name='имя'
-    )
+    first_name = models.CharField(max_length=constants.CHAR_LENGTH, verbose_name="имя")
 
     last_name = models.CharField(
-        max_length=constants.CHAR_LENGTH,
-        verbose_name='фамилия',
-        **NULLABLE
+        max_length=constants.CHAR_LENGTH, verbose_name="фамилия", **NULLABLE
     )
 
     avatar = models.ImageField(
-        upload_to='users/avatars',
+        upload_to="users/avatars",
         verbose_name="аватарка",
-        validators=[FileExtensionValidator(allowed_extensions=constants.IMAGE_EXTENSIONS),
-                    services.validata_avatar_size
-                    ],
-        **NULLABLE
+        validators=[
+            FileExtensionValidator(allowed_extensions=constants.IMAGE_EXTENSIONS),
+            services.validata_avatar_size,
+        ],
+        **NULLABLE,
     )
 
     phone_number = models.CharField(
         max_length=constants.CHAR_LENGTH,
-        verbose_name='номер телефона',
+        verbose_name="номер телефона",
         unique=True,
     )
     description = models.CharField(
         max_length=constants.DESCRIPTION_LENGTH,
         **constants.NULLABLE,
-        verbose_name='Описание'
+        verbose_name="Описание",
     )
 
     checking_code = models.CharField(
-        max_length=constants.CHAR_LENGTH,
-        verbose_name='проверочный код',
-        **NULLABLE
+        max_length=constants.CHAR_LENGTH, verbose_name="проверочный код", **NULLABLE
     )
 
     created_at = models.DateTimeField(
-        auto_now_add=True,
-        verbose_name='дата регистрации'
+        auto_now_add=True, verbose_name="дата регистрации"
     )
 
-    updated_at = models.DateTimeField(
-        auto_now=True,
-        verbose_name='дата изменения'
-    )
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="дата изменения")
 
     is_active = models.BooleanField(default=False)
 
@@ -84,21 +74,19 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
     consent_personal_data = models.BooleanField(
-        default=False,
-        verbose_name='Согласие на обработку персональных данных'
+        default=False, verbose_name="Согласие на обработку персональных данных"
     )
     password = models.CharField(max_length=constants.PASSWORD_CHAR_LENGTH, **NULLABLE)
 
     # Новое поле для отслеживания времени последней отправки кода
     last_code_sent = models.DateTimeField(
-        **NULLABLE,
-        verbose_name='время последней отправки кода'
+        **NULLABLE, verbose_name="время последней отправки кода"
     )
 
     objects = UserManager()
 
-    USERNAME_FIELD = 'phone_number'
-    REQUIRED_FIELDS = ['email']
+    USERNAME_FIELD = "phone_number"
+    REQUIRED_FIELDS = ["email"]
 
     class Meta:
         verbose_name = "Пользователь"
@@ -110,16 +98,22 @@ class User(AbstractBaseUser, PermissionsMixin):
             self.email = str(self.email).lower()
 
     def __str__(self):
-        return f'Пользователь {self.email}'
+        return f"Пользователь {self.email}"
 
 
 class Subscription(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='subscriptions')  # Подписчик
-    subscribed_to = models.ForeignKey(User, on_delete=models.CASCADE, related_name='subscribers')  # На кого подписались
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="subscriptions"
+    )
+    subscribed_to = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="subscribers"
+    )
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        unique_together = ('user', 'subscribed_to')
+        verbose_name = "Подписка"
+        verbose_name_plural = "Подписки"
+        unique_together = ("user", "subscribed_to")
 
     def __str__(self):
         return f"{self.user.email} подписан на {self.subscribed_to.email}"

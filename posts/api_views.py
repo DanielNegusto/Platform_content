@@ -1,10 +1,8 @@
 from rest_framework import generics
-from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
-
-from users.models import Subscription
+from rest_framework.permissions import IsAuthenticated
 from .models import Post
 from .pagination import CustomPagination
-from .serializers import PostSerializer # Добавьте новый сериализатор
+from .serializers import PostSerializer
 
 
 class PostListAPIView(generics.ListAPIView):

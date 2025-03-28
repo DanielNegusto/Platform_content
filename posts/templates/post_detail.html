@@ -12,13 +12,40 @@
                 </p>
 
                 {% if has_access %}
-                    {% if post.image %}
-                        <img src="{{ post.image.url }}" alt="{{ post.title }}" class="img-fluid mb-3" />
-                    {% endif %}
+                    <div class="media-container mb-3">
+                        {% if post.image %}
+                            <div class="image-container" id="imageContainer">
+                                <img src="{{ post.image.url }}" alt="{{ post.title }}" class="img-fluid" id="postImage" />
+                            </div>
+                        {% else %}
+                            <div class="video-container" id="postVideo">
+                                <video controls class="img-fluid">
+                                    <source src="{{ post.video.url }}" type="video/mp4">
+                                    Ваш браузер не поддерживает воспроизведение видео.
+                                </video>
+                            </div>
+                        {% endif %}
+
+                        {% if post.video and post.image %}
+                            <div class="video-container d-none" id="postVideo">
+                                <video controls class="img-fluid">
+                                    <source src="{{ post.video.url }}" type="video/mp4">
+                                    Ваш браузер не поддерживает воспроизведение видео.
+                                </video>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="media-controls">
+                        {% if post.image and post.video %}
+                            <button id="toggleMedia" class="btn btn-secondary">Показать видео</button>
+                        {% endif %}
+                    </div>
+
                     <p>{{ post.content }}</p>
                 {% else %}
                     <p>Вы не можете просмотреть этот пост, так как он платный. Чтобы прочитать данный контент, вам нужно подписаться на автора.</p>
-                    <p><strong>Автор:</strong> <a href="{% url 'profile_detail' post.author.email %}">{{ post.author.email }}</a></p>  <!-- Ссылка на профиль автора -->
+                    <p><strong>Автор:</strong> <a href="{% url 'profile_detail' post.author.email %}">{{ post.author.email }}</a></p>
                 {% endif %}
 
                 <div class="mt-4">
@@ -31,10 +58,50 @@
     </div>
 
     <script>
-        document.querySelectorAll('.checkout-button').forEach(button => {
-            button.addEventListener('click', function() {
-                alert('Пожалуйста, свяжитесь с автором для получения доступа к этому посту.'); // Сообщение для пользователя
+        const toggleButton = document.getElementById('toggleMedia');
+        const imageContainer = document.getElementById('imageContainer');
+        const videoContainer = document.getElementById('postVideo');
+
+        if (toggleButton) {
+            toggleButton.addEventListener('click', function() {
+                if (videoContainer.classList.contains('d-none')) {
+                    videoContainer.classList.remove('d-none');
+                    imageContainer.classList.add('d-none');
+                    toggleButton.textContent = 'Показать изображение';
+                } else {
+                    videoContainer.classList.add('d-none');
+                    imageContainer.classList.remove('d-none');
+                    toggleButton.textContent = 'Показать видео';
+                }
             });
-        });
+        }
     </script>
+
+    <style>
+        .media-container {
+            position: relative; /* Устанавливаем относительное позиционирование для контейнера */
+            width: 100%; /* Ширина контейнера */
+            max-height: 400px; /* Максимальная высота контейнера */
+            overflow: hidden; /* Скрыть переполнение */
+        }
+
+        .image-container, .video-container {
+            width: 100%; /* Ширина контейнера */
+            height: auto; /* Автоматическая высота */
+            display: flex; /* Используем flexbox для центрирования */
+            justify-content: center; /* Центрируем по горизонтали */
+            align-items: center; /* Центрируем по вертикали */
+        }
+
+        .image-container img {
+            width: auto; /* Автоматическая ширина */
+            max-height: 400px; /* Максимальная высота изображения */
+            object-fit: cover; /* Обрезка изображения, чтобы оно заполнило контейнер */
+        }
+
+        .video-container video {
+            width: 100%; /* Ширина видео */
+            max-height: 400px; /* Максимальная высота видео */
+        }
+    </style>
 {% endblock %}
