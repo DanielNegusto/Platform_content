@@ -11,6 +11,18 @@ from .services import create_checkout_session
 
 
 class ProfileRetrieveAPIView(generics.RetrieveAPIView):
+    """
+    Получение профиля пользователя.
+
+    **Метод**: GET
+    **Параметры**:
+    - `id`: Идентификатор пользователя.
+
+    **Ответ**:
+    - 200 OK: Данные профиля пользователя.
+    - 404 Not Found: Если пользователь не найден.
+    - 403 Forbidden: Если запрашивается профиль другого пользователя.
+    """
     queryset = users_models.User.objects.all()
     permission_classes = [permissions.IsAuthenticated]
     lookup_field = "id"
@@ -24,6 +36,18 @@ class ProfileRetrieveAPIView(generics.RetrieveAPIView):
 
 
 class UserUpdateAPIView(generics.UpdateAPIView):
+    """
+    Обновление профиля пользователя.
+
+    **Метод**: PUT
+    **Тело запроса**:
+    - Данные для обновления профиля.
+
+    **Ответы**:
+    - 200 OK: Профиль успешно обновлен.
+    - 400 Bad Request: Ошибка валидации данных.
+    - 403 Forbidden: Если пользователь пытается обновить чужой профиль.
+    """
     queryset = users_models.User.objects.all()
     serializer_class = users_serializers.UserUpdateSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -33,6 +57,18 @@ class UserUpdateAPIView(generics.UpdateAPIView):
 
 
 class UserDestroyAPIView(generics.DestroyAPIView):
+    """
+    Удаление пользователя.
+
+    **Метод**: DELETE
+    **Параметры**:
+    - `id`: Идентификатор пользователя.
+
+    **Ответы**:
+    - 204 No Content: Пользователь успешно удален.
+    - 404 Not Found: Если пользователь не найден.
+    - 403 Forbidden: Если пользователь пытается удалить чужой профиль.
+    """
     queryset = users_models.User.objects.all()
     permission_classes = [permissions.IsAuthenticated]
     lookup_field = "id"
@@ -46,6 +82,18 @@ class UserDestroyAPIView(generics.DestroyAPIView):
 
 
 class SignInView(generics.GenericAPIView):
+    """
+    Вход пользователя.
+
+    **Метод**: POST
+    **Тело запроса**:
+    - `username`: Имя пользователя.
+    - `password`: Пароль.
+
+    **Ответы**:
+    - 200 OK: Успешный вход.
+    - 400 Bad Request: Ошибка валидации данных.
+    """
     serializer_class = users_serializers.SignInSerializer
     permission_classes = [permissions.AllowAny]
 
@@ -59,6 +107,19 @@ class SignInView(generics.GenericAPIView):
 
 
 class SignUpAPIView(generics.CreateAPIView):
+    """
+    Регистрация нового пользователя.
+
+    **Метод**: POST
+    **Тело запроса**:
+    - `username`: Имя пользователя.
+    - `email`: Электронная почта.
+    - `password`: Пароль.
+
+    **Ответы**:
+    - 201 Created: Успешная регистрация, проверочный код отправлен на почту.
+    - 400 Bad Request: Ошибка валидации данных.
+    """
     serializer_class = users_serializers.SignUpSerializer
     permission_classes = [permissions.AllowAny]
 
@@ -86,6 +147,18 @@ class SignUpAPIView(generics.CreateAPIView):
 
 
 class AuthView(generics.GenericAPIView):
+    """
+    Аутентификация пользователя с проверочным кодом.
+
+    **Метод**: POST
+    **Тело запроса**:
+    - `email`: Электронная почта пользователя.
+    - `code`: Проверочный код.
+
+    **Ответы**:
+    - 200 OK: Успешная аутентификация.
+    - 400 Bad Request: Ошибка валидации данных.
+    """
     serializer_class = users_serializers.AuthCodeSerializer
     permission_classes = [permissions.AllowAny]
 
@@ -100,6 +173,18 @@ class AuthView(generics.GenericAPIView):
 
 
 class CreateAPICheckoutSessionView(generics.GenericAPIView):
+    """
+    Создание сессии для оформления подписки.
+
+    **Метод**: GET
+    **Параметры**:
+    - `email`: Электронная почта пользователя, на которого оформляется подписка.
+
+    **Ответы**:
+    - 200 OK: URL для оформления подписки.
+    - 400 Bad Request: Ошибка, если email не указан или пользователь уже подписан.
+    - 404 Not Found: Если пользователь не найден.
+    """
     permission_classes = [IsAuthenticated]
 
     def get(self, request, email):
