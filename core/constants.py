@@ -2,6 +2,7 @@
 from datetime import timedelta
 
 from decouple import config
+SECRET_KEY = config("SECRET_KEY")
 
 DEBUG = config("DEBUG", "False") == "True"
 
@@ -14,6 +15,8 @@ EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD")
 
 # не обязательные поля для моделей
 NULLABLE = {"blank": True, "null": True}
+
+HOST_IP = config("HOST_IP")
 
 CHAR_LENGTH = 50
 PASSWORD_CHAR_LENGTH = 130

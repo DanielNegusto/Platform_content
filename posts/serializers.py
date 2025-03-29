@@ -25,20 +25,16 @@ class PostSerializer(serializers.ModelSerializer):
         representation = super().to_representation(instance)
         user = self.context["request"].user
 
-        # Проверяем, является ли текущий пользователь автором поста
         is_author = user == instance.author
 
-        # Проверяем, есть ли у пользователя подписка на автора
         is_subscribed = Subscription.objects.filter(
             user=user, subscribed_to=instance.author
         ).exists()
 
         if instance.status == Post.PAID:
             if is_author or is_subscribed:
-                # Если пользователь автор поста или подписан, возвращаем полное представление
                 return representation
             else:
-                # Если платный пост, возвращаем ограниченные поля для неподписанных пользователей
                 limited_representation = {
                     "id": instance.id,
                     "title": representation["title"],
@@ -47,5 +43,4 @@ class PostSerializer(serializers.ModelSerializer):
                 }
                 return limited_representation
 
-        # Для бесплатных постов возвращаем все поля
         return representation
