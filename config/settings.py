@@ -29,7 +29,7 @@ SECRET_KEY = constants.SECRET_KEY
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = constants.DEBUG
 
-ALLOWED_HOSTS = [constants.HOST_IP, "localhost", "*"]
+ALLOWED_HOSTS = ["localhost", "*"]
 
 
 # Application definition
@@ -83,25 +83,17 @@ WSGI_APPLICATION = "config.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-if DEBUG:
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.sqlite3",
-            "NAME": os.path.join(BASE_DIR, "db.sqlite3"),
-        }
-    }
 
-else:
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.postgresql",
-            "NAME": constants.POSTGRES_DB,
-            "USER": constants.POSTGRES_USER,
-            "PASSWORD": constants.POSTGRES_PASSWORD,
-            "HOST": constants.DB_HOST,
-            "PORT": constants.DB_PORT,
-        }
+DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": constants.POSTGRES_DB,
+        "USER": constants.POSTGRES_USER,
+        "PASSWORD": constants.POSTGRES_PASSWORD,
+        "HOST": constants.DB_HOST,
+        "PORT": constants.DB_PORT,
     }
+}
 
 AUTH_USER_MODEL = "users.User"
 

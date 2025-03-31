@@ -1,10 +1,7 @@
 from unittest.mock import patch
 
-from django.core import mail
 from django.test import TestCase
-from django.utils import timezone
 
-from core import constants
 from .models import Subscription, User
 from django.urls import reverse
 
