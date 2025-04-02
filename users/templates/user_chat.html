@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+
+{% block title %}Чат поддержки{% endblock %}
+
+{% block content %}
+<div class="container chat-container">
+    <h2>Чат поддержки</h2>
+
+    <div class="chat-box">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="message">
+                    <strong>
+                        {% if message.moderator %}
+                            {{ message.moderator.email }} (Модератор):
+                        {% else %}
+                            {{ message.user.email }}:
+                        {% endif %}
+                    </strong>
+                    <p>{{ message.message }}</p>
+                    <small class="text-muted">{{ message.created_at }}</small>
+                </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+
+    <form method="POST" class="message-form">
+        {% csrf_token %}
+        <div class="mb-3">
+            <textarea class="form-control" name="message" rows="3" placeholder="Введите ваше сообщение..." required></textarea>
+        </div>
+        <div class="form-buttons">
+            <button type="submit" class="btn btn-primary">Отправить</button>
+            <a href="{% url 'home' %}" class="btn btn-secondary">Назад</a>
+        </div>
+    </form>
+</div>
+
+<style>
+    .chat-container {
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+    }
+
+    .chat-box {
+        flex: 1;
+        overflow-y: auto;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        padding: 10px;
+        margin-bottom: 10px;
+        background-color: #f9f9f9;
+    }
+
+    .message {
+        border: 1px solid #e0e0e0;
+        border-radius: 5px;
+        padding: 10px;
+        margin-bottom: 10px;
+        background-color: #fff;
+        color: #333; /* Цвет текста для сообщений */
+    }
+
+    .message strong {
+        display: block;
+        margin-bottom: 5px;
+        color: #007bff; /* Цвет для имени пользователя */
+    }
+
+    .message p {
+        margin: 0;
+        color: #333; /* Цвет текста для тела сообщения */
+    }
+
+    .message small {
+        display: block;
+        margin-top: 5px;
+        color: #888; /* Цвет для времени сообщения */
+    }
+
+    .message-form {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .form-buttons {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 10px;
+    }
+
+    textarea {
+        resize: none;
+    }
+</style>
+{% endblock %}

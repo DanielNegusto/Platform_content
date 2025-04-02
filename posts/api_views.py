@@ -20,6 +20,7 @@ class PostListAPIView(generics.ListAPIView):
     - 200 OK: Список постов.
     - 401 Unauthorized: Если пользователь не авторизован и пытается получить доступ к защищенным данным.
     """
+
     pagination_class = CustomPagination
     serializer_class = PostSerializer
 
@@ -47,6 +48,7 @@ class PostCreateAPIView(generics.CreateAPIView):
     - 400 Bad Request: Ошибка валидации данных.
     - 401 Unauthorized: Если пользователь не авторизован.
     """
+
     queryset = Post.objects.all()
     serializer_class = PostSerializer
     permission_classes = [IsAuthenticated]
@@ -75,6 +77,7 @@ class PostDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
     - 404 Not Found: Пост не найден.
     - 401 Unauthorized: Если пользователь не авторизован.
     """
+
     queryset = Post.objects.all()
     serializer_class = PostSerializer
     permission_classes = [IsAuthenticated]

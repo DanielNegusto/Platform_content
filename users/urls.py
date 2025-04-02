@@ -20,6 +20,13 @@ from .views import (
     CreateCheckoutSessionView,
     SuccessView,
     ErrorView,
+    UserChatView,
+    ModeratorChatView,
+    ChatDetailView,
+    CloseChatView,
+    ModeratorPostView,
+    ApprovePostView,
+    RejectPostView,
 )
 
 urlpatterns = [
@@ -57,4 +64,21 @@ urlpatterns = [
     ),
     path("success/", SuccessView.as_view(), name="success"),
     path("cancel/", ErrorView.as_view(), name="error"),
+    path("user_chat/", UserChatView.as_view(), name="user_chat_view"),
+    path(
+        "moderator_chat/", ModeratorChatView.as_view(), name="moderator_chat_view"
+    ),  # Чат модератора
+    path("chat/<int:user_id>/", ChatDetailView.as_view(), name="chat_detail"),
+    path("chat/close/<int:chat_id>/", CloseChatView.as_view(), name="close_chat"),
+    path("moderator/posts/", ModeratorPostView.as_view(), name="moderator_post_view"),
+    path(
+        "moderator/posts/approve/<int:post_id>/",
+        ApprovePostView.as_view(),
+        name="approve_post",
+    ),
+    path(
+        "moderator/posts/reject/<int:post_id>/",
+        RejectPostView.as_view(),
+        name="reject_post",
+    ),
 ]

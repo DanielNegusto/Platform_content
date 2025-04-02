@@ -22,10 +22,25 @@ class Post(models.Model):
         (PAID, "Платная"),
     ]
 
+    PENDING = "pending"
+    APPROVED = "approved"
+    REJECTED = "rejected"
+    MODERATION_STATUS_CHOICES = [
+        (PENDING, "Ожидает модерации"),
+        (APPROVED, "Одобрено"),
+        (REJECTED, "Отклонено"),
+    ]
+
     title = models.CharField(max_length=255, verbose_name="Заголовок")
     content = models.TextField(verbose_name="Содержание")
     status = models.CharField(
         max_length=4, choices=STATUS_CHOICES, default=FREE, verbose_name="Статус"
+    )
+    moderation_status = models.CharField(
+        max_length=9,
+        choices=MODERATION_STATUS_CHOICES,
+        default=PENDING,
+        verbose_name="Статус модерации",
     )
     author = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="posts"

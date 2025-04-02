@@ -4,9 +4,7 @@ from users.models import User
 
 
 class SignUpForm(forms.ModelForm):
-    phone_number = forms.CharField(
-        max_length=15, required=True, label="Phone Number"
-    )
+    phone_number = forms.CharField(max_length=15, required=True, label="Phone Number")
     email = forms.EmailField(required=True)
     password = forms.CharField(widget=forms.PasswordInput, required=True)
     confirm_password = forms.CharField(

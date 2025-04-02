@@ -117,3 +117,22 @@ class Subscription(models.Model):
 
     def __str__(self):
         return f"{self.user.email} подписан на {self.subscribed_to.email}"
+
+
+class ChatMessage(models.Model):
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="user_messages"
+    )
+    moderator = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="moderator_mes",
+    )
+    message = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_closed = models.BooleanField(default=False)  # Поле для статуса чата
+
+    def __str__(self):
+        return f"{self.user.email} -> {self.moderator.email if self.moderator else 'System'}: {self.message}"

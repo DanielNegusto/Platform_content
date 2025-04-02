@@ -27,8 +27,20 @@
         .container {
             flex: 1;
         }
-        .navbar-brand, .nav-link {
-            color: #ffdd57 !important; /* Измените цвет текста для лучшей видимости */
+        .navbar-brand {
+            color: #ffdd57 !important; /* Цвет текста для кнопки Главная */
+            font-weight: bold; /* Сделаем текст жирным */
+            padding: 10px 15px; /* Добавим отступы для кнопки */
+            border: 2px solid #ffdd57; /* Добавим рамку */
+            border-radius: 5px; /* Скруглим углы */
+            transition: background-color 0.3s, color 0.3s; /* Плавный переход */
+        }
+        .navbar-brand:hover {
+            background-color: #ffdd57; /* Цвет фона при наведении */
+            color: #000; /* Цвет текста при наведении */
+        }
+        .nav-link {
+            color: #ffdd57 !important; /* Цвет текста для других ссылок */
         }
         .nav-link:hover {
             color: #fff !important; /* Цвет при наведении */
@@ -45,12 +57,25 @@
             border-radius: 50%;
             margin-left: 10px;
         }
+        .button-container {
+            display: flex;
+            align-items: center; /* Центрируем кнопки по вертикали */
+            margin-left: auto; /* Отодвигаем кнопки вправо */
+            gap: 10px; /* Добавляем отступ между кнопками */
+        }
     </style>
 </head>
 <body>
     <header>
         <nav class="navbar navbar-expand-lg navbar-light">
             <a class="navbar-brand" href="{% url 'home' %}">Главная</a>
+            <div class="button-container">
+                {% if user.is_staff %}
+                    <a href="{% url 'moderator_chat_view' %}" class="btn btn-warning">Модерация</a>
+                {% else %}
+                    <a href="{% url 'user_chat_view' %}" class="btn btn-info">Поддержка</a>
+                {% endif %}
+            </div>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
@@ -91,8 +116,21 @@
     <main class="container mt-4">
         {% block content %}{% endblock %}
     </main>
-    <footer>
-        <p>&copy; 2023 Мой блог</p>
+    <footer style="background-color: rgba(0, 0, 0, 0.7); padding: 20px; text-align: center; color: #fff;">
+        <div class="container">
+            <h4>Контакты</h4>
+            <p>Email: <a href="mailto:support@example.com" style="color: #ffdd57;">support@example.com</a></p>
+            <p>Телефон: <span style="color: #ffdd57;">+1 (234) 567-890</span></p>
+            <p>Социальные сети:</p>
+            <p>
+                <a href="#" style="color: #ffdd57; margin: 0 10px;">Facebook</a>
+                <a href="#" style="color: #ffdd57; margin: 0 10px;">Twitter</a>
+                <a href="#" style="color: #ffdd57; margin: 0 10px;">Instagram</a>
+            </p>
+        </div>
+        <div style="margin-top: 15px;">
+            <p>&copy; 2023 Платформа PremiumContent</p>
+        </div>
     </footer>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>

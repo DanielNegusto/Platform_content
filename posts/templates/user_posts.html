@@ -11,8 +11,23 @@
                     <h5 class="mb-1">{{ post.title }}</h5>
                     <p class="mb-1">{{ post.content|truncatewords:30 }}</p>
                     <p class="mb-1"><strong>Дата создания:</strong> {{ post.created_at|date:"d M Y" }}</p>
+
+                    <!-- Отображение статуса поста -->
+                    <p class="mb-1">
+                        <strong>Статус:</strong>
+                        {% if post.moderation_status == "pending" %}
+                            На проверке у модераторов
+                        {% elif post.moderation_status == "approved" %}
+                            Одобрен
+                        {% elif post.moderation_status == "rejected" %}
+                            Отклонен
+                        {% else %}
+                            Неизвестный статус
+                        {% endif %}
+                    </p>
+
                     <a href="{% url 'post_edit' post.id %}" class="btn btn-warning btn-sm">Редактировать</a>
-                    <a href="{% url 'post_delete' post.id %}" class="btn btn-danger btn-sm">Удалить</a>  <!-- Ссылка на удаление -->
+                    <a href="{% url 'post_delete' post.id %}" class="btn btn-danger btn-sm">Удалить</a> <!-- Ссылка на удаление -->
                 </div>
             {% empty %}
                 <div class="list-group-item">У вас еще нет постов.</div>

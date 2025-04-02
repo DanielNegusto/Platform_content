@@ -15,7 +15,7 @@ from .forms import (
     SignUpForm,
     UserProfileForm,
 )
-from .models import User, Subscription
+from .models import User, Subscription, ChatMessage
 from .services import generate_code, create_checkout_session
 
 stripe.api_key = settings.STRIPE_TEST_SECRET_KEY
@@ -72,24 +72,20 @@ class ProfileView(LoginRequiredMixin, DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         user = self.get_object()
-        posts = Post.objects.filter(author=user)
-        stripe_public_key = (
-            settings.STRIPE_TEST_PUBLIC_KEY
-        )
+
+        posts = Post.objects.filter(author=user, moderation_status=Post.APPROVED)
+
+        stripe_public_key = settings.STRIPE_TEST_PUBLIC_KEY
 
         is_subscribed = Subscription.objects.filter(
             user=self.request.user, subscribed_to=user
         ).exists()
-        subscribers_count = (
-            user.subscribers.count()
-        )
+        subscribers_count = user.subscribers.count()
 
         context["posts"] = posts
         context["stripe_public_key"] = stripe_public_key
         context["is_subscribed"] = is_subscribed
-        context["subscribers_count"] = (
-            subscribers_count
-        )
+        context["subscribers_count"] = subscribers_count
 
         return context
 
@@ -179,3 +175,79 @@ class SuccessView(View):
 class ErrorView(View):
     def get(self, request):
         return render(request, "error.html")
+
+
+class UserChatView(LoginRequiredMixin, View):
+    def get(self, request):
+        active_chats = ChatMessage.objects.filter(user=request.user, is_closed=False)
+        return render(request, "user_chat.html", {"messages": active_chats})
+
+    def post(self, request):
+        message = request.POST["message"]
+        chat_message = ChatMessage(user=request.user, message=message)
+        chat_message.save()
+        return redirect("user_chat_view")
+
+
+class ModeratorChatView(LoginRequiredMixin, View):
+    def get(self, request):
+        if not request.user.is_staff:
+            return redirect("home")  # Если не модератор, перенаправляем на главную
+
+        active_chats = ChatMessage.objects.filter(is_closed=False).distinct("user")
+        return render(request, "moderator_chat.html", {"active_chats": active_chats})
+
+
+class ChatDetailView(LoginRequiredMixin, View):
+    def get(self, request, user_id):
+        messages = ChatMessage.objects.filter(user_id=user_id).order_by("created_at")
+        return render(
+            request, "chat_detail.html", {"messages": messages, "user_id": user_id}
+        )
+
+    def post(self, request, user_id):
+        message = request.POST["message"]
+        chat_message = ChatMessage(
+            user_id=user_id, moderator=request.user, message=message
+        )
+        chat_message.save()
+        return redirect("chat_detail_view", user_id=user_id)
+
+
+class CloseChatView(LoginRequiredMixin, View):
+    def post(self, request, chat_id):
+        chat = get_object_or_404(ChatMessage, id=chat_id)
+        chat.is_closed = True
+        chat.save()
+        return redirect("moderator_chat_view")
+
+
+class ModeratorPostView(LoginRequiredMixin, View):
+    def get(self, request):
+        if not request.user.is_staff:
+            return redirect("home")  # Если не модератор, перенаправляем на главную
+
+        pending_posts = Post.objects.filter(moderation_status=Post.PENDING)
+        return render(request, "moderator_posts.html", {"pending_posts": pending_posts})
+
+
+class ApprovePostView(LoginRequiredMixin, View):
+    def get(self, request, post_id):
+        if not request.user.is_staff:
+            return redirect("home")  # Если не модератор, перенаправляем на главную
+
+        post = get_object_or_404(Post, id=post_id)
+        post.moderation_status = Post.APPROVED
+        post.save()
+        return redirect("moderator_post_view")
+
+
+class RejectPostView(LoginRequiredMixin, View):
+    def get(self, request, post_id):
+        if not request.user.is_staff:
+            return redirect("home")  # Если не модератор, перенаправляем на главную
+
+        post = get_object_or_404(Post, id=post_id)
+        post.moderation_status = Post.REJECTED
+        post.save()
+        return redirect("moderator_post_view")

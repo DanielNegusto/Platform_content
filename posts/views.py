@@ -1,6 +1,6 @@
 import stripe
 from django.conf import settings
-from django.shortcuts import redirect, render
+from django.shortcuts import redirect, render, get_object_or_404
 from django.views import View
 from django.views.generic import ListView, DetailView, DeleteView
 from django.urls import reverse_lazy
@@ -21,9 +21,15 @@ class PostListView(ListView):
     def get_queryset(self):
         queryset = super().get_queryset()
 
+        # Фильтрация только одобренных постов
+        queryset = queryset.filter(moderation_status=Post.APPROVED)
+
+        # Фильтрация по категориям
         categories = self.request.GET.getlist("categories")
         if categories:
             queryset = queryset.filter(categories__slug__in=categories).distinct()
+
+        # Фильтрация по статусу
         status_filter = self.request.GET.get("status", "free")
         if status_filter == "paid":
             queryset = queryset.filter(status="paid")
@@ -105,14 +111,15 @@ class PostUpdateView(View):
     template_name = "post_form.html"
 
     def get(self, request, pk):
-        post = Post.objects.get(pk=pk)
+        post = get_object_or_404(Post, pk=pk)
         form = PostForm(instance=post)
         return render(request, self.template_name, {"form": form})
 
     def post(self, request, pk):
-        post = Post.objects.get(pk=pk)
+        post = get_object_or_404(Post, pk=pk)
         form = PostForm(request.POST, request.FILES, instance=post)
         if form.is_valid():
+            post.moderation_status = Post.PENDING
             form.save()
             return redirect("user_posts")
         return render(request, self.template_name, {"form": form})

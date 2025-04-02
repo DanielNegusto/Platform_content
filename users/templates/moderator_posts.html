@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block title %}Посты на модерации{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Посты на модерации</h2>
+    <div class="list-group">
+        {% for post in pending_posts %}
+            <div class="list-group-item">
+                <h5 class="mb-1">{{ post.title }}</h5>
+                <p class="mb-1">{{ post.content|truncatewords:30 }}</p>
+                <p class="mb-1"><strong>Автор:</strong> <a href="{% url 'profile_detail' post.author.email %}">{{ post.author.email }}</a></p>
+                <div class="d-flex justify-content-between">
+                    <a href="{% url 'post_detail' post.id %}" class="btn btn-info btn-sm">Просмотреть пост</a>
+                    <div>
+                        <a href="{% url 'approve_post' post.id %}" class="btn btn-success btn-sm">Одобрить</a>
+                        <a href="{% url 'reject_post' post.id %}" class="btn btn-danger btn-sm">Отклонить</a>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="alert alert-warning">Нет постов на модерации.</div>
+        {% endfor %}
+    </div>
+    <a href="{% url 'moderator_chat_view' %}" class="btn btn-secondary mt-3">Назад</a>
+</div>
+{% endblock %}

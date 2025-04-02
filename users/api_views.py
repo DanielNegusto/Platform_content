@@ -23,6 +23,7 @@ class ProfileRetrieveAPIView(generics.RetrieveAPIView):
     - 404 Not Found: Если пользователь не найден.
     - 403 Forbidden: Если запрашивается профиль другого пользователя.
     """
+
     queryset = users_models.User.objects.all()
     permission_classes = [permissions.IsAuthenticated]
     lookup_field = "id"
@@ -48,6 +49,7 @@ class UserUpdateAPIView(generics.UpdateAPIView):
     - 400 Bad Request: Ошибка валидации данных.
     - 403 Forbidden: Если пользователь пытается обновить чужой профиль.
     """
+
     queryset = users_models.User.objects.all()
     serializer_class = users_serializers.UserUpdateSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -69,6 +71,7 @@ class UserDestroyAPIView(generics.DestroyAPIView):
     - 404 Not Found: Если пользователь не найден.
     - 403 Forbidden: Если пользователь пытается удалить чужой профиль.
     """
+
     queryset = users_models.User.objects.all()
     permission_classes = [permissions.IsAuthenticated]
     lookup_field = "id"
@@ -94,6 +97,7 @@ class SignInView(generics.GenericAPIView):
     - 200 OK: Успешный вход.
     - 400 Bad Request: Ошибка валидации данных.
     """
+
     serializer_class = users_serializers.SignInSerializer
     permission_classes = [permissions.AllowAny]
 
@@ -120,6 +124,7 @@ class SignUpAPIView(generics.CreateAPIView):
     - 201 Created: Успешная регистрация, проверочный код отправлен на почту.
     - 400 Bad Request: Ошибка валидации данных.
     """
+
     serializer_class = users_serializers.SignUpSerializer
     permission_classes = [permissions.AllowAny]
 
@@ -159,6 +164,7 @@ class AuthView(generics.GenericAPIView):
     - 200 OK: Успешная аутентификация.
     - 400 Bad Request: Ошибка валидации данных.
     """
+
     serializer_class = users_serializers.AuthCodeSerializer
     permission_classes = [permissions.AllowAny]
 
@@ -185,6 +191,7 @@ class CreateAPICheckoutSessionView(generics.GenericAPIView):
     - 400 Bad Request: Ошибка, если email не указан или пользователь уже подписан.
     - 404 Not Found: Если пользователь не найден.
     """
+
     permission_classes = [IsAuthenticated]
 
     def get(self, request, email):
