@@ -211,7 +211,7 @@ class ChatDetailView(LoginRequiredMixin, View):
             user_id=user_id, moderator=request.user, message=message
         )
         chat_message.save()
-        return redirect("chat_detail_view", user_id=user_id)
+        return redirect("chat_detail", user_id=user_id)
 
 
 class CloseChatView(LoginRequiredMixin, View):
