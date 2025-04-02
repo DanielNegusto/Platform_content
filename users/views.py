@@ -215,7 +215,7 @@ class ChatDetailView(LoginRequiredMixin, View):
 
 
 class CloseChatView(LoginRequiredMixin, View):
-    def post(self, request, chat_id):
+    def get(self, request, chat_id):
         chat = get_object_or_404(ChatMessage, id=chat_id)
         chat.is_closed = True
         chat.save()
