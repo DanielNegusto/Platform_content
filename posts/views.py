@@ -90,6 +90,7 @@ class PostDetailView(DetailView):
                 or Subscription.objects.filter(
                     user=user, subscribed_to=self.object.author
                 ).exists()
+                or user.is_staff
             )
         else:
             has_access = self.object.status == "free"

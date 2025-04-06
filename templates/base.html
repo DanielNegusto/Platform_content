@@ -70,7 +70,7 @@
         <nav class="navbar navbar-expand-lg navbar-light">
             <a class="navbar-brand" href="{% url 'home' %}">Главная</a>
             <div class="button-container">
-                {% if user.is_staff %}
+                {% if request.user.is_staff %}
                     <a href="{% url 'moderator_chat_view' %}" class="btn btn-warning">Модерация</a>
                 {% else %}
                     <a href="{% url 'user_chat_view' %}" class="btn btn-info">Поддержка</a>

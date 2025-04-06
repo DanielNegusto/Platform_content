@@ -17,17 +17,10 @@
                             <div class="image-container" id="imageContainer">
                                 <img src="{{ post.image.url }}" alt="{{ post.title }}" class="img-fluid" id="postImage" />
                             </div>
-                        {% else %}
-                            <div class="video-container" id="postVideo">
-                                <video controls class="img-fluid">
-                                    <source src="{{ post.video.url }}" type="video/mp4">
-                                    Ваш браузер не поддерживает воспроизведение видео.
-                                </video>
-                            </div>
                         {% endif %}
 
-                        {% if post.video and post.image %}
-                            <div class="video-container d-none" id="postVideo">
+                        {% if post.video %}
+                            <div class="video-container" id="postVideo">
                                 <video controls class="img-fluid">
                                     <source src="{{ post.video.url }}" type="video/mp4">
                                     Ваш браузер не поддерживает воспроизведение видео.
